@@ -42,6 +42,10 @@ WECHATY_PUPPET=wechaty-puppet-wechat
 ```
 При запуске в терминале появится QR‑код и ссылка на него — отсканируйте в WeChat.
 
+Официальная документация:
+- https://wechaty.js.org/docs/puppet-providers/
+- https://github.com/wechaty/puppet-wechat
+
 ### Google Sheets API
 1. В Google Cloud Console создайте проект.
 2. Включите API: **Google Sheets API**.
