@@ -1,4 +1,5 @@
 import { Message, WechatyBuilder } from "wechaty";
+import qrTerminal from "qrcode-terminal";
 import { config } from "./config.js";
 import { logger } from "./logger.js";
 import { handleMessage, Session } from "./fsm.js";
@@ -41,16 +42,26 @@ const buildOperatorMention = (fromCurrency: string): string => {
 export const startAgent = (): void => {
   const bot = WechatyBuilder.build({
     puppet: config.wechaty.puppet,
-    puppetOptions: { token: config.wechaty.token },
     name: "mt-pay-wechat-fx-agent",
   });
 
   bot.on("scan", (qrcode, status) => {
-    logger.info("Scan QR Code to login", { qrcode, status });
+    logger.info("Scan QR Code to login", { status });
+    qrTerminal.generate(qrcode, { small: true });
+    const qrUrl = `https://wechaty.js.org/qrcode/${encodeURIComponent(qrcode)}`;
+    logger.info("QR Code URL", { qrUrl });
   });
 
   bot.on("login", (user) => {
-    logger.info("Logged in", { user: user.id });
+    logger.info("Logged in", { user: user.name() });
+  });
+
+  bot.on("logout", (user) => {
+    logger.info("Logged out", { user: user.name() });
+  });
+
+  bot.on("error", (error) => {
+    logger.error("Wechaty error", { error });
   });
 
   bot.on("message", async (message: Message) => {

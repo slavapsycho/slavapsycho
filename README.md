@@ -2,7 +2,7 @@
 
 ## Требования
 - Node.js 20+
-- Wechaty Puppet (например, `wechaty-puppet-service`)
+- Wechaty Puppet `wechaty-puppet-wechat` (QR‑логин в личный WeChat)
 - Доступ к Google Sheets API
 - Доступ к Gemini API
 
@@ -18,8 +18,8 @@ cp .env.example .env
 ```
 
 Заполните переменные:
-- `WECHATY_PUPPET` — имя puppet (например, `wechaty-puppet-service`).
-- `WECHATY_PUPPET_SERVICE_TOKEN` — токен от Wechaty Puppet Service.
+- `WECHATY_PUPPET` — должен быть `wechaty-puppet-wechat`.
+- `WECHATY_LOG` — опционально, `verbose` для детальных логов.
 - `GEMINI_API_KEY` — API-ключ Gemini.
 - `GEMINI_MODEL` — модель, например `gemini-1.5-flash`.
 - `GOOGLE_SHEETS_API_KEY` — API-ключ Google Sheets.
@@ -34,14 +34,13 @@ cp .env.example .env
 2. Создайте ключ.
 3. Запишите его в `GEMINI_API_KEY`.
 
-### Wechaty Puppet Service
-1. Зарегистрируйтесь/войдите в Wechaty Puppet Service.
-2. Создайте токен (Service Token).
-3. Укажите:
-   - `WECHATY_PUPPET=wechaty-puppet-service`
-   - `WECHATY_PUPPET_SERVICE_TOKEN=<ваш_токен>`
-
-Официальный ресурс: https://wechaty.js.org/docs/puppet-services/ .
+### Wechaty (QR‑логин, личный аккаунт)
+Ключи **не нужны**. Бот логинится через QR‑код в ваш личный WeChat.
+Обязательно оставьте в `.env`:
+```
+WECHATY_PUPPET=wechaty-puppet-wechat
+```
+При запуске в терминале появится QR‑код и ссылка на него — отсканируйте в WeChat.
 
 ### Google Sheets API
 1. В Google Cloud Console создайте проект.
@@ -53,21 +52,36 @@ cp .env.example .env
 
 Документация: https://developers.google.com/sheets/api .
 
-## Запуск
-Сборка:
-```bash
-npm run build
-```
+## Запуск (подробно, для новичка)
+1. Установите зависимости:
+   ```bash
+   npm install
+   ```
+2. Скопируйте и заполните `.env`:
+   ```bash
+   cp .env.example .env
+   ```
+   Укажите свои ключи Gemini и Google Sheets. WeChat ключи не нужны.
+3. Соберите проект:
+   ```bash
+   npm run build
+   ```
+4. Запустите:
+   ```bash
+   npm run start
+   ```
+5. В терминале появится QR‑код — откройте WeChat на телефоне и сканируйте.
 
-Запуск:
-```bash
-npm run start
-```
-
-Для разработки:
+Если хотите запускать без сборки (для разработки), используйте:
 ```bash
 npm run dev
 ```
+
+## Что происходит при логине
+При старте:
+- в консоли появится QR‑код и URL,
+- после сканирования вы увидите лог “Logged in” с вашим именем,
+- сессия сохраняется автоматически, повторный логин обычно не нужен.
 
 ## Управление ботом (скрытый локальный интерфейс)
 Чтобы интерфейс не был виден клиенту, управление делается через локальную веб-страницу

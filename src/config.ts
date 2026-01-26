@@ -2,13 +2,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const required = [
-  "WECHATY_PUPPET",
-  "WECHATY_PUPPET_SERVICE_TOKEN",
-  "GEMINI_API_KEY",
-  "GEMINI_MODEL",
-  "GOOGLE_SHEETS_API_KEY",
-];
+const required = ["GEMINI_API_KEY", "GEMINI_MODEL", "GOOGLE_SHEETS_API_KEY"];
 
 const missing = required.filter((key) => !process.env[key]);
 if (missing.length > 0) {
@@ -31,8 +25,8 @@ const getOptionalEnv = (key: string): string | undefined => {
 export const config = {
   env: process.env.NODE_ENV ?? "production",
   wechaty: {
-    puppet: getEnv("WECHATY_PUPPET"),
-    token: getEnv("WECHATY_PUPPET_SERVICE_TOKEN"),
+    puppet: process.env.WECHATY_PUPPET ?? "wechaty-puppet-wechat",
+    log: process.env.WECHATY_LOG,
   },
   gemini: {
     apiKey: getEnv("GEMINI_API_KEY"),
