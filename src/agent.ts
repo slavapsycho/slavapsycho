@@ -42,7 +42,11 @@ const buildOperatorMention = (fromCurrency: string): string => {
 
 export const startAgent = (): void => {
   const bot = WechatyBuilder.build({
-    puppet: config.wechaty.puppet,
+    puppet: "wechaty-puppet-wechat",
+    puppetOptions: {
+      uos: true,
+      token: process.env.WECHATY_PUPPET_WECHAT_TOKEN,
+    },
     name: "mt-pay-wechat-fx-agent",
   });
 
