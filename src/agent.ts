@@ -1,4 +1,4 @@
-import { WechatyBuilder, types } from "wechaty";
+import { ScanStatus, WechatyBuilder, types } from "wechaty";
 import type { Message } from "wechaty";
 import qrTerminal from "qrcode-terminal";
 import { config } from "./config.js";
@@ -47,10 +47,14 @@ export const startAgent = (): void => {
   });
 
   bot.on("scan", (qrcode, status) => {
-    logger.info("Scan QR Code to login", { status });
-    qrTerminal.generate(qrcode, { small: true });
-    const qrUrl = `https://wechaty.js.org/qrcode/${encodeURIComponent(qrcode)}`;
-    logger.info("QR Code URL", { qrUrl });
+    if (status === ScanStatus.Waiting || status === ScanStatus.Timeout) {
+      console.log("\n=== WECHAT LOGIN QR ===\n");
+      qrTerminal.generate(qrcode, { small: true });
+      console.log("\nOpen this URL if the terminal QR is not readable:\n");
+      console.log(`https://wechaty.js.org/qrcode/${encodeURIComponent(qrcode)}\n`);
+    } else {
+      console.log("Scan status:", ScanStatus[status]);
+    }
   });
 
   bot.on("login", (user) => {
