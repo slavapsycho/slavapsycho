@@ -1,4 +1,5 @@
-import { Message, WechatyBuilder } from "wechaty";
+import { WechatyBuilder, types } from "wechaty";
+import type { Message } from "wechaty";
 import qrTerminal from "qrcode-terminal";
 import { config } from "./config.js";
 import { logger } from "./logger.js";
@@ -12,10 +13,10 @@ const operatorMentions = {
 };
 
 const attachmentTypes = new Set([
-  Message.Type.Image,
-  Message.Type.Attachment,
-  Message.Type.Video,
-  Message.Type.Audio,
+  types.MessageType.Image,
+  types.MessageType.Attachment,
+  types.MessageType.Video,
+  types.MessageType.Audio,
 ]);
 
 const sessions = new Map<string, Session>();
@@ -41,7 +42,7 @@ const buildOperatorMention = (fromCurrency: string): string => {
 
 export const startAgent = (): void => {
   const bot = WechatyBuilder.build({
-    puppet: config.wechaty.puppet,
+    puppet: config.wechaty.puppet as string,
     name: "mt-pay-wechat-fx-agent",
   });
 
