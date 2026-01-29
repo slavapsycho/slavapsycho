@@ -1,0 +1,31 @@
+name: Force overwrite main from source branch
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_branch:
+        description: "Branch to copy into main"
+        required: true
+        default: "design-deterministic-wechat-currency-exchange-agent-zgqppa"
+
+jobs:
+  force_update_main:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main with full history
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Fetch source branch
+        run: |
+          git fetch origin "${{ inputs.source_branch }}":"refs/remotes/origin/${{ inputs.source_branch }}"
+
+      - name: Hard reset main to source branch
+        run: |
+          git reset --hard "origin/${{ inputs.source_branch }}"
+
+      - name: Force push to main
+        run: |
+          git push origin HEAD:main --force
