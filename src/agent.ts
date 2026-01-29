@@ -13,10 +13,10 @@ const operatorMentions = {
 };
 
 const attachmentTypes = new Set([
-  types.MessageType.Image,
-  types.MessageType.Attachment,
-  types.MessageType.Video,
-  types.MessageType.Audio,
+  types.Message.Image,
+  types.Message.Attachment,
+  types.Message.Video,
+  types.Message.Audio,
 ]);
 
 const sessions = new Map<string, Session>();
@@ -42,7 +42,7 @@ const buildOperatorMention = (fromCurrency: string): string => {
 
 export const startAgent = (): void => {
   const bot = WechatyBuilder.build({
-    puppet: config.wechaty.puppet as string,
+    puppet: config.wechaty.puppet,
     name: "mt-pay-wechat-fx-agent",
   });
 

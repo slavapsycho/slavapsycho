@@ -34,7 +34,7 @@ const parseOptionalPort = (value?: string): number | undefined => {
 export const config = {
   env: process.env.NODE_ENV ?? "production",
   wechaty: {
-    puppet: process.env.WECHATY_PUPPET ?? "wechaty-puppet-wechat",
+    puppet: (process.env.WECHATY_PUPPET ?? "wechaty-puppet-wechat") as "wechaty-puppet-wechat",
     log: process.env.WECHATY_LOG,
   },
   gemini: {
