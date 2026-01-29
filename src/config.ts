@@ -22,6 +22,15 @@ const getOptionalEnv = (key: string): string | undefined => {
   return value && value.length > 0 ? value : undefined;
 };
 
+const parseOptionalPort = (value?: string): number | undefined => {
+  if (!value) return undefined;
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed < 1 || parsed > 65535) {
+    throw new Error(`Invalid CONTROL_PORT: ${value}`);
+  }
+  return parsed;
+};
+
 export const config = {
   env: process.env.NODE_ENV ?? "production",
   wechaty: {
@@ -36,9 +45,7 @@ export const config = {
     apiKey: getEnv("GOOGLE_SHEETS_API_KEY"),
   },
   control: {
-    port: getOptionalEnv("CONTROL_PORT")
-      ? Number(getOptionalEnv("CONTROL_PORT"))
-      : undefined,
+    port: parseOptionalPort(getOptionalEnv("CONTROL_PORT")),
     token: getOptionalEnv("CONTROL_TOKEN"),
   },
 };

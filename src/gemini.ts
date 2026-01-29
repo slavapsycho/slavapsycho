@@ -12,7 +12,14 @@ type GeminiExtraction = {
 
 const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${config.gemini.model}:generateContent?key=${config.gemini.apiKey}`;
 
-const extractionPrompt = systemPrompt;
+const extractionPrompt = [
+  systemPrompt,
+  "Ты парсер запросов на обмен валют.",
+  "Верни ТОЛЬКО JSON без пояснений.",
+  "Допустимые валюты: RUB, CNY, KZT, USDT.",
+  "Поля: fromCurrency, toCurrency, amount, amountCurrency.",
+  "Если поле неизвестно, не включай его.",
+].join("\n");
 
 export const extractWithGemini = async (text: string): Promise<GeminiExtraction | null> => {
   const body = {

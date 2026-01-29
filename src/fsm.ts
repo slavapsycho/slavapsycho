@@ -117,8 +117,15 @@ const detectAmountByCurrency = (text: string): {
   return { amount, amountCurrency: currency };
 };
 
-const formatRate = (fromCurrency: CurrencyCode, rate: number): string => {
-  return `1 ${fromCurrency} = ${rate.toFixed(2)} RUB`;
+const formatRate = (
+  fromCurrency: CurrencyCode,
+  toCurrency: CurrencyCode,
+  rates: Record<CurrencyCode, number>,
+): string => {
+  if (fromCurrency === "RUB") {
+    return `1 ${toCurrency} = ${rates[toCurrency].toFixed(2)} RUB`;
+  }
+  return `1 ${fromCurrency} = ${rates[fromCurrency].toFixed(2)} RUB`;
 };
 
 const calculateAmounts = (
@@ -129,6 +136,16 @@ const calculateAmounts = (
 ): number => {
   const rubValue = amountFrom * rates[fromCurrency];
   return rubValue / rates[toCurrency];
+};
+
+const calculateAmountFrom = (
+  fromCurrency: CurrencyCode,
+  toCurrency: CurrencyCode,
+  amountTo: number,
+  rates: Record<CurrencyCode, number>,
+): number => {
+  const rubValue = amountTo * rates[toCurrency];
+  return rubValue / rates[fromCurrency];
 };
 
 const fallbackRates: Record<CurrencyCode, number> = {
@@ -239,20 +256,28 @@ export const handleMessage = async (
   if (session.state === "TASK_DISCOVERY") {
     const gemini = await extractWithGemini(text);
     const direction = extractDirectionalCurrencies(text);
-    const { amount, amountCurrency } = detectAmountByCurrency(text);
+    const detectedAmount = detectAmountByCurrency(text);
     const fromCurrency = gemini?.fromCurrency ?? direction.fromCurrency;
     const toCurrency = gemini?.toCurrency ?? direction.toCurrency;
-    const amountValue = gemini?.amount ?? amount ?? detectAmount(text);
+    const amountValue = gemini?.amount ?? detectedAmount.amount ?? detectAmount(text);
+    const amountCurrency = gemini?.amountCurrency ?? detectedAmount.amountCurrency;
 
     session.task.fromCurrency = fromCurrency ?? session.task.fromCurrency;
     session.task.toCurrency = toCurrency ?? session.task.toCurrency;
-    session.task.amountFrom = amountValue ?? session.task.amountFrom;
 
-    if (amountCurrency && session.task.fromCurrency && amountCurrency !== session.task.fromCurrency) {
+    if (amountValue !== undefined) {
+      if (amountCurrency && session.task.toCurrency === amountCurrency) {
+        session.task.amountTo = amountValue;
+      } else {
+        session.task.amountFrom = amountValue;
+      }
+    }
+
+    if (amountCurrency && !session.task.toCurrency && session.task.fromCurrency !== amountCurrency) {
       session.task.toCurrency = amountCurrency;
     }
 
-    if (!session.task.fromCurrency || !session.task.toCurrency || !session.task.amountFrom) {
+    if (!session.task.fromCurrency || !session.task.toCurrency || (!session.task.amountFrom && !session.task.amountTo)) {
       const question =
         "Уточните, пожалуйста: какую валюту отдаёте, какую получаете и на какую сумму?";
       await send(question);
@@ -280,14 +305,29 @@ export const handleMessage = async (
       }
     }
 
-    const amountTo = calculateAmounts(
+    if (!session.task.amountFrom && session.task.amountTo) {
+      session.task.amountFrom = calculateAmountFrom(
+        session.task.fromCurrency,
+        session.task.toCurrency,
+        session.task.amountTo,
+        rates,
+      );
+    }
+
+    if (session.task.amountFrom) {
+      session.task.amountTo = calculateAmounts(
+        session.task.fromCurrency,
+        session.task.toCurrency,
+        session.task.amountFrom,
+        rates,
+      );
+    }
+
+    const rateText = formatRate(
       session.task.fromCurrency,
       session.task.toCurrency,
-      session.task.amountFrom,
       rates,
     );
-    session.task.amountTo = amountTo;
-    const rateText = formatRate(session.task.fromCurrency, rates[session.task.fromCurrency]);
     await send(readinessPrompt.replace("{{rate}}", rateText));
     session.state = "READINESS_CHECK";
     return { session };

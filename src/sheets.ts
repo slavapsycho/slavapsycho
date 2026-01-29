@@ -16,7 +16,8 @@ let cache: RateCache | null = null;
 
 const normalizeRow = (currencyRaw: string, rateRaw: string): [CurrencyCode, number] | null => {
   const currency = currencyRaw.replace(/[^A-Z]/gi, "").toUpperCase();
-  const rate = Number(rateRaw);
+  const normalizedRate = rateRaw.replace(",", ".").trim();
+  const rate = Number(normalizedRate);
   if (!rate || Number.isNaN(rate)) {
     return null;
   }
